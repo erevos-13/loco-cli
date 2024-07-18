@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -8,6 +9,7 @@ import (
 
 	"voutsaridis.com/loco-translate-cli/api"
 	"voutsaridis.com/loco-translate-cli/filemanage"
+	"voutsaridis.com/loco-translate-cli/locales"
 )
 
 type Translation struct{}
@@ -18,7 +20,7 @@ func WriteInFile(filePath, data string) {
 	dir := filepath.Dir(filePath)
 
 	// Create the directory if it does not exist
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0777); err != nil {
 		log.Fatalf("Failed to create directory: %s", err)
 	}
 
@@ -30,9 +32,13 @@ func WriteInFile(filePath, data string) {
 			log.Fatalf("Failed to create file: %s", err)
 		}
 		defer file.Close()
+		// Write data to the file
+		if _, err := file.WriteString(data); err != nil {
+			log.Fatalf("Failed to write to file: %s", err)
+		}
 	} else {
 		// If the file exists, open it in append mode
-		file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0644)
+		file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
 			log.Fatalf("Failed to open file: %s", err)
 		}
@@ -47,14 +53,18 @@ func WriteInFile(filePath, data string) {
 
 func main() {
 	root, _ := os.Getwd()
-	filePath := root + "/data/%s.json"
-	writeFilePath := root + "/assets/locale/%s.json"
+	argsWithProg := os.Args[1:]
+	fmt.Println("-------------------")
+	fmt.Printf("Arguments Token: %s\n", argsWithProg[0])
+	fmt.Println("-------------------")
+	fmt.Printf("Arguments Path to get the json: %s\n", argsWithProg[1])
+	fmt.Println("-------------------")
+	fmt.Printf("Arguments locale: %s\n", argsWithProg[2])
+	fmt.Println("-------------------")
+	fmt.Printf("Arguments path to store the json: %s \n", argsWithProg[3])
+	fmt.Println("-------------------")
 
-	stringJson, err := filemanage.ReadTextFile(fmt.Sprintf(filePath, "en"))
-	if err != nil {
-		panic(err)
-	}
-
+	stringJson, err := filemanage.ReadTextFile(root + string(argsWithProg[1]))
 	if err != nil {
 		panic(err)
 	}
@@ -65,11 +75,26 @@ func main() {
 	}
 	fmt.Println(sendFile)
 
-	response, err := api.GetTranslationByLocal("en")
+	// Get the locales
+	locales, err := locales.GetLocales(argsWithProg[0])
 	if err != nil {
 		panic(err)
 	}
-	urlPath := fmt.Sprintf(writeFilePath, "en")
-	WriteInFile(urlPath, response)
+
+	response, err := api.GetTranslationByLocal(argsWithProg[0])
+	if err != nil {
+		panic(err)
+	}
+	makJsonData := make(map[string]json.RawMessage)
+	errMapJson := json.Unmarshal([]byte(response), &makJsonData)
+	if errMapJson != nil {
+		panic(errMapJson)
+	}
+
+	for _, locale := range locales {
+		urlPath := root + string(argsWithProg[3]) + "/" + locale.Code + ".json"
+		fmt.Printf("Locale: %s is going to store to %s\n", locale.Code, urlPath)
+		WriteInFile(urlPath, string(makJsonData[locale.Code]))
+	}
 
 }

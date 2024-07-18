@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 )
@@ -20,10 +19,6 @@ func PostTranslation(fileToSend string) (string, error) {
 	if res.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("error on post api call to locale status code: %d ", res.StatusCode)
 	}
-	resData, errRead := io.ReadAll(res.Body)
-	if errRead != nil {
-		return "", fmt.Errorf("error on read response body: %s", errRead)
-	}
-	fmt.Printf("Update response data %s", resData)
-	return fmt.Sprintf("File %s is successfully uploaded", fileToSend), nil
+
+	return fmt.Sprint("File is successfully uploaded"), nil
 }

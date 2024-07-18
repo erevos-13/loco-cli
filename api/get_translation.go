@@ -6,13 +6,10 @@ import (
 	"net/http"
 )
 
-const API_URL = "https://localise.biz/api/export/locale/%s.json?key=%s&fallback=en"
+const API_URL = "https://localise.biz/api/export/all.json?fallback=en&no-folding=true&key=%s"
 
-func GetTranslationByLocal(locale string) (string, error) {
-	if len(locale) == 0 {
-		return "", fmt.Errorf("locale is required")
-	}
-	res, err := http.Get(fmt.Sprintf(API_URL, locale, "hu6pYwo4kq0UL0oeitgr_ugZFeMxcSb3P"))
+func GetTranslationByLocal(token string) (string, error) {
+	res, err := http.Get(fmt.Sprintf(API_URL, token))
 	if err != nil {
 		return "", fmt.Errorf("error on api call to locale error: %s", err)
 	}
