@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"voutsaridis.com/loco-translate-cli/api"
-	"voutsaridis.com/loco-translate-cli/filemanage"
-	"voutsaridis.com/loco-translate-cli/locales"
+	"github.com/erevos-13/loco-cli/api"
+	"github.com/erevos-13/loco-cli/filemanage"
+	"github.com/erevos-13/loco-cli/locales"
 )
 
 type Translation struct{}
