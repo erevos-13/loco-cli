@@ -6,13 +6,13 @@ import (
 	"strings"
 )
 
-const URL_API = "https://localise.biz/api/import/json?key=%s&locale=en&ignore-existing=true&tag-absent=obsolete&format=JSON"
+const URL_API = "https://localise.biz/api/import/json?key=%s&locale=%s&ignore-existing=true&tag-absent=obsolete&format=JSON"
 
-func PostTranslation(fileToSend string) (string, error) {
+func PostTranslation(fileToSend string, locale string) (string, error) {
 	if len(fileToSend) == 0 {
 		return "", fmt.Errorf("filename is required")
 	}
-	res, err := http.Post(fmt.Sprintf(URL_API, "hu6pYwo4kq0UL0oeitgr_ugZFeMxcSb3P"), "application/json", strings.NewReader(fileToSend))
+	res, err := http.Post(fmt.Sprintf(URL_API, "hu6pYwo4kq0UL0oeitgr_ugZFeMxcSb3P", locale), "application/json", strings.NewReader(fileToSend))
 	if err != nil {
 		return "", fmt.Errorf("error on api call to locale error: %s", err)
 	}

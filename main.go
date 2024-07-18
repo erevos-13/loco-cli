@@ -54,37 +54,57 @@ func WriteInFile(filePath, data string) {
 func main() {
 	root, _ := os.Getwd()
 	argsWithProg := os.Args[1:]
-	if len(argsWithProg) != 4 {
-		panic("You need to pass 4 arguments")
-	}
-	fmt.Println("-------------------")
-	fmt.Printf("Arguments Token: %s\n", argsWithProg[0])
-	fmt.Println("-------------------")
-	fmt.Printf("Arguments Path to get the json: %s\n", argsWithProg[1])
-	fmt.Println("-------------------")
-	fmt.Printf("Arguments locale: %s\n", argsWithProg[2])
-	fmt.Println("-------------------")
-	fmt.Printf("Arguments path to store the json: %s \n", argsWithProg[3])
-	fmt.Println("-------------------")
+	var token string
+	var pathToGetJson string
+	var locale string
+	var pathToStoreJson string
 
-	stringJson, err := filemanage.ReadTextFile(root + string(argsWithProg[1]))
+	if len(argsWithProg) != 4 {
+		fmt.Println("Please provide the token")
+		fmt.Scan(&token)
+		fmt.Println("Please provide the Path to get the json")
+		fmt.Scan(&pathToGetJson)
+		fmt.Println("Please provide the locale")
+		fmt.Scan(&locale)
+		fmt.Println("Please provide the path to store the json")
+		fmt.Scan(&pathToStoreJson)
+	} else {
+		fmt.Println("-------------------")
+		fmt.Printf("Arguments Token: %s\n", argsWithProg[0])
+		fmt.Println("-------------------")
+		fmt.Printf("Arguments Path to get the json: %s\n", argsWithProg[1])
+		fmt.Println("-------------------")
+		fmt.Printf("Arguments locale: %s\n", argsWithProg[2])
+		fmt.Println("-------------------")
+		fmt.Printf("Arguments path to store the json: %s \n", argsWithProg[3])
+		fmt.Println("-------------------")
+		token = argsWithProg[0]
+		pathToGetJson = argsWithProg[1]
+		locale = argsWithProg[2]
+		pathToStoreJson = argsWithProg[3]
+	}
+	if locale == "" || token == "" || pathToGetJson == "" || pathToStoreJson == "" {
+		panic("Please provide the token, path to get the json, locale and path to store the json")
+	}
+
+	stringJson, err := filemanage.ReadTextFile(root + string(pathToGetJson))
 	if err != nil {
 		panic(err)
 	}
 
-	sendFile, errorSendFile := api.PostTranslation(stringJson)
+	sendFile, errorSendFile := api.PostTranslation(stringJson, locale)
 	if errorSendFile != nil {
 		panic(errorSendFile)
 	}
 	fmt.Println(sendFile)
 
 	// Get the locales
-	locales, err := locales.GetLocales(argsWithProg[0])
+	locales, err := locales.GetLocales(token)
 	if err != nil {
 		panic(err)
 	}
 
-	response, err := api.GetTranslationByLocal(argsWithProg[0])
+	response, err := api.GetTranslationByLocal(token)
 	if err != nil {
 		panic(err)
 	}
@@ -95,7 +115,7 @@ func main() {
 	}
 
 	for _, locale := range locales {
-		urlPath := root + string(argsWithProg[3]) + "/" + locale.Code + ".json"
+		urlPath := root + string(pathToStoreJson) + "/" + locale.Code + ".json"
 		fmt.Printf("Locale: %s is going to store to %s\n", locale.Code, urlPath)
 		WriteInFile(urlPath, string(makJsonData[locale.Code]))
 	}
