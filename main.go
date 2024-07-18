@@ -54,6 +54,9 @@ func WriteInFile(filePath, data string) {
 func main() {
 	root, _ := os.Getwd()
 	argsWithProg := os.Args[1:]
+	if len(argsWithProg) != 4 {
+		panic("You need to pass 4 arguments")
+	}
 	fmt.Println("-------------------")
 	fmt.Printf("Arguments Token: %s\n", argsWithProg[0])
 	fmt.Println("-------------------")
